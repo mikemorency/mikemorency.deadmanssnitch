@@ -78,13 +78,13 @@ jobs:
   #         DMS_API_KEY: ${{ secrets.DMS_API_KEY }}
 
   integration-217:
-    name: Integration (Ⓐ2.17)
+    name: Integration (Ⓐstable-2.17)
     runs-on: ubuntu-latest
     steps:
       - name: Perform integration testing
         uses: ansible-community/ansible-test-gh-action@release/v1
         with:
-          ansible-core-version: 2.17
+          ansible-core-version: stable-2.17
           testing-type: integration
           pull-request-change-detection: false
           coverage: never
@@ -94,13 +94,13 @@ jobs:
 
   integration-218:
     needs: [integration-217]
-    name: Integration (Ⓐ2.18)
+    name: Integration (Ⓐstable-2.18)
     runs-on: ubuntu-latest
     steps:
       - name: Perform integration testing
         uses: ansible-community/ansible-test-gh-action@release/v1
         with:
-          ansible-core-version: 2.18
+          ansible-core-version: stable-2.18
           testing-type: integration
           pull-request-change-detection: false
           coverage: never
@@ -110,13 +110,13 @@ jobs:
 
   integration-219:
     needs: [integration-218]
-    name: Integration (Ⓐ2.19)
+    name: Integration (Ⓐstable-2.19)
     runs-on: ubuntu-latest
     steps:
       - name: Perform integration testing
         uses: ansible-community/ansible-test-gh-action@release/v1
         with:
-          ansible-core-version: 2.19
+          ansible-core-version: stable-2.19
           testing-type: integration
           pull-request-change-detection: false
           coverage: never
