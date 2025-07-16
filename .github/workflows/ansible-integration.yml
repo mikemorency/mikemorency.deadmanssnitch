@@ -52,23 +52,87 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  integration:
-    name: Integration (Ⓐ${{ matrix.ansible }})
-    strategy:
-      matrix:
-        ansible:
-          - stable-2.17
-          - stable-2.18
-          - stable-2.19
-          - devel
+  # Jobs need to be run serially due to using the free tier of DMS
+  # integration:
+  #   name: Integration (Ⓐ${{ matrix.ansible }})
+  #   strategy:
+  #     matrix:
+  #       ansible:
+  #         - stable-2.17
+  #         - stable-2.18
+  #         - stable-2.19
+  #         - devel
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Perform integration testing
+  #       # See the documentation for the following GitHub action on
+  #       # https://github.com/ansible-community/ansible-test-gh-action/blob/main/README.md
+  #       uses: ansible-community/ansible-test-gh-action@release/v1
+  #       with:
+  #         ansible-core-version: ${{ matrix.ansible }}
+  #         testing-type: integration
+  #         pull-request-change-detection: false
+  #         coverage: never
+  #         pre-test-cmd: ./tests/integration/generate_integration_config.sh
+  #       env:
+  #         DMS_API_KEY: ${{ secrets.DMS_API_KEY }}
+
+  integration-217:
+    name: Integration (Ⓐ2.17)
     runs-on: ubuntu-latest
     steps:
       - name: Perform integration testing
-        # See the documentation for the following GitHub action on
-        # https://github.com/ansible-community/ansible-test-gh-action/blob/main/README.md
         uses: ansible-community/ansible-test-gh-action@release/v1
         with:
-          ansible-core-version: ${{ matrix.ansible }}
+          ansible-core-version: 2.17
+          testing-type: integration
+          pull-request-change-detection: false
+          coverage: never
+          pre-test-cmd: ./tests/integration/generate_integration_config.sh
+        env:
+          DMS_API_KEY: ${{ secrets.DMS_API_KEY }}
+
+  integration-218:
+    needs: [integration-217]
+    name: Integration (Ⓐ2.18)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Perform integration testing
+        uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          ansible-core-version: 2.18
+          testing-type: integration
+          pull-request-change-detection: false
+          coverage: never
+          pre-test-cmd: ./tests/integration/generate_integration_config.sh
+        env:
+          DMS_API_KEY: ${{ secrets.DMS_API_KEY }}
+
+  integration-219:
+    needs: [integration-218]
+    name: Integration (Ⓐ2.19)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Perform integration testing
+        uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          ansible-core-version: 2.19
+          testing-type: integration
+          pull-request-change-detection: false
+          coverage: never
+          pre-test-cmd: ./tests/integration/generate_integration_config.sh
+        env:
+          DMS_API_KEY: ${{ secrets.DMS_API_KEY }}
+
+  integration-devel:
+    needs: [integration-219]
+    name: Integration (Ⓐdevel)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Perform integration testing
+        uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          ansible-core-version: devel
           testing-type: integration
           pull-request-change-detection: false
           coverage: never
@@ -83,7 +147,10 @@ jobs:
     if: always()
 
     needs:
-      - integration
+      - integration-217
+      - integration-218
+      - integration-219
+      - integration-devel
 
     runs-on: ubuntu-latest
 
