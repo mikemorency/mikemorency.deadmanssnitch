@@ -1,5 +1,6 @@
 __pycache__
 *.tar.gz
+changelogs/.plugin-cache.yaml
 
 # ansible lint
 .cache

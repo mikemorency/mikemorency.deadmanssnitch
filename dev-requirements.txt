@@ -2,3 +2,4 @@ black
 pre-commit
 codespell
 pytest
+antsibull-docs
