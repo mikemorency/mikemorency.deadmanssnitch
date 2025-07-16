@@ -1,0 +1,7 @@
+---
+requires_ansible: ">=2.17.0"
+action_groups:
+    deadmanssnitch:
+        - snitch
+        - tags
+        - snitch_info

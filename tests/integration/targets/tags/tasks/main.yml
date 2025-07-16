@@ -1,0 +1,130 @@
+---
+- name: Test
+  environment:
+    DMS_API_KEY: "{{ integration_config_dms_api_key }}"
+  block:
+    - name: Create snitch
+      mikemorency.deadmanssnitch.snitch:
+        name: "{{ test_prefix }}-tags"
+        interval: "hourly"
+      register: _create
+
+    #
+    # Add
+    #
+    - name: Add tags
+      mikemorency.deadmanssnitch.tags: &add
+        id: "{{ _create.snitch.id }}"
+        state: present
+        tags:
+          - one
+          - two
+          - three
+      register: _add
+    - name: Add tags - idem
+      mikemorency.deadmanssnitch.tags: *add
+      register: _add_idem
+
+    - name: Lookup
+      mikemorency.deadmanssnitch.snitch_info:
+        id: "{{ _create.snitch.id }}"
+      register: _lookup_snitch
+
+    - name: Assert tags were added
+      ansible.builtin.assert:
+        that:
+          - _add.changed
+          - not _add_idem.changed
+          - "'one' in _lookup_snitch.snitches[0].tags"
+          - "'two' in _lookup_snitch.snitches[0].tags"
+          - "'three' in _lookup_snitch.snitches[0].tags"
+
+    #
+    # Replace
+    #
+    - name: Replace tags
+      mikemorency.deadmanssnitch.tags: &replace
+        id: "{{ _create.snitch.id }}"
+        state: absolute
+        tags:
+          - 1
+          - 2
+          - 3
+      register: _replace
+    - name: Replace tags - idem
+      mikemorency.deadmanssnitch.tags: *replace
+      register: _replace_idem
+
+    - name: Lookup
+      mikemorency.deadmanssnitch.snitch_info:
+        id: "{{ _create.snitch.id }}"
+      register: _lookup_snitch
+
+    - name: Assert tags were replaced
+      ansible.builtin.assert:
+        that:
+          - _replace.changed
+          - not _replace_idem.changed
+          - "'1' in _lookup_snitch.snitches[0].tags"
+          - "'2' in _lookup_snitch.snitches[0].tags"
+          - "'3' in _lookup_snitch.snitches[0].tags"
+          - "'one' not in _lookup_snitch.snitches[0].tags"
+          - "'two' not in _lookup_snitch.snitches[0].tags"
+          - "'three' not in _lookup_snitch.snitches[0].tags"
+
+    #
+    # Delete
+    #
+    - name: Delete multiple tags
+      mikemorency.deadmanssnitch.tags: &delete
+        id: "{{ _create.snitch.id }}"
+        state: absent
+        tags:
+          - 1
+          - 2
+      register: _delete
+    - name: Delete multiple tags - idem
+      mikemorency.deadmanssnitch.tags: *delete
+      register: _delete_idem
+
+    - name: Lookup
+      mikemorency.deadmanssnitch.snitch_info:
+        id: "{{ _create.snitch.id }}"
+      register: _lookup_snitch
+
+    - name: Assert tags were deleted
+      ansible.builtin.assert:
+        that:
+          - _delete.changed
+          - not _delete_idem.changed
+          - "'1' not in _lookup_snitch.snitches[0].tags"
+          - "'2' not in _lookup_snitch.snitches[0].tags"
+          - "'3' in _lookup_snitch.snitches[0].tags"
+
+    - name: Delete all tags
+      mikemorency.deadmanssnitch.tags: &delete_all
+        id: "{{ _create.snitch.id }}"
+        state: absolute
+        tags: []
+      register: _delete_all
+    - name: Delete all tags - idem
+      mikemorency.deadmanssnitch.tags: *delete_all
+      register: _delete_all_idem
+
+    - name: Lookup
+      mikemorency.deadmanssnitch.snitch_info:
+        id: "{{ _create.snitch.id }}"
+      register: _lookup_snitch
+
+    - name: Assert tags were deleted
+      ansible.builtin.assert:
+        that:
+          - _delete.changed
+          - not _delete_idem.changed
+          - _lookup_snitch.snitches[0].tags | length == 0
+
+  always:
+    - name: Delete snitch
+      mikemorency.deadmanssnitch.snitch:
+        name: "{{ test_prefix }}-tags"
+        state: absent

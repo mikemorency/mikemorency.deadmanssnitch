@@ -1,0 +1,34 @@
+---
+namespace: mikemorency
+name: deadmanssnitch
+
+version: '0.0.1'
+
+readme: README.md
+
+authors:
+  - Mike Morency <mikemorency93@gmail.com>
+
+description: >-
+  Modules for managing Dead Mans Snitch resources
+
+license:
+  - GPL-3.0-or-later
+
+license_file: LICENSE
+
+tags:
+  - 'deadmanssnitch'
+  - 'dead mans snitch'
+  - 'dms'
+  - 'monitoring'
+  - 'scheduling'
+
+dependencies: {}
+
+repository: 'https://github.com/mikemorency/deadmanssnitch'
+
+build_ignore:
+  - .venv
+  - .vscode
+  - tests/integration/integration_config.yml

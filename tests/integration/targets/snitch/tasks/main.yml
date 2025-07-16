@@ -1,0 +1,60 @@
+---
+- name: Test
+  environment:
+    DMS_API_KEY: "{{ integration_config_dms_api_key }}"
+  block:
+    - name: Create snitch
+      mikemorency.deadmanssnitch.snitch: &create_snitch
+        name: "{{ test_prefix }}-snitch"
+        interval: "hourly"
+        alert_type: "basic"
+        notes: "This is a test snitch"
+      register: _create
+    - name: Create snitch - idempotence
+      mikemorency.deadmanssnitch.snitch: *create_snitch
+      register: _create_idem
+    - name: Get snitch
+      mikemorency.deadmanssnitch.snitch_info:
+        name: "{{ test_prefix }}-snitch"
+      register: _lookup_snitch
+
+    - name: Assert snitch was created
+      ansible.builtin.assert:
+        that:
+          - _create.changed
+          - not _create_idem.changed
+          - _lookup_snitch.snitches[0].name == test_prefix + "-snitch"
+          - _lookup_snitch.snitches[0].interval == "hourly"
+          - _lookup_snitch.snitches[0].alert_type == "basic"
+          - _lookup_snitch.snitches[0].notes == "This is a test snitch"
+
+    - name: Modify snitch
+      mikemorency.deadmanssnitch.snitch: &modify_snitch
+        name: "{{ test_prefix }}-snitch"
+        interval: "daily"
+        alert_type: "basic"
+        notes: "This is a test snitch - modified"
+      register: _modify
+    - name: Modify snitch - idempotence
+      mikemorency.deadmanssnitch.snitch: *modify_snitch
+      register: _modify_idem
+    - name: Get snitch
+      mikemorency.deadmanssnitch.snitch_info:
+        name: "{{ test_prefix }}-snitch"
+      register: _lookup_snitch
+
+    - name: Assert snitch was created
+      ansible.builtin.assert:
+        that:
+          - _modify.changed
+          - not _modify_idem.changed
+          - _lookup_snitch.snitches[0].name == test_prefix + "-snitch"
+          - _lookup_snitch.snitches[0].interval == "daily"
+          - _lookup_snitch.snitches[0].alert_type == "basic"
+          - _lookup_snitch.snitches[0].notes == "This is a test snitch - modified"
+
+  always:
+    - name: Delete snitch
+      mikemorency.deadmanssnitch.snitch:
+        name: "{{ test_prefix }}-snitch"
+        state: absent
