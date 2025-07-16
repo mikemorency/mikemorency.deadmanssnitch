@@ -12,9 +12,6 @@ authors:
 description: >-
   Modules for managing Dead Mans Snitch resources
 
-license:
-  - GPL-3.0-or-later
-
 license_file: LICENSE
 
 tags:
